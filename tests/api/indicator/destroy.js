@@ -1,7 +1,7 @@
 
 const Indicators = require('../../../core/api/indicator')
 const accessToken = process.env.ACCESS_TOKEN
-const baseUrl = 'https//supervisor.theeye.io'
+const baseUrl = process.env.THEEYE_API_URL || 'https://supervisor.theeye.io'
 
 const main = async () => {
 

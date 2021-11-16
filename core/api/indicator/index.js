@@ -4,7 +4,7 @@ const http = require('http')
 const debug = require('debug')('theeye:indicator')
 const { URL } = require('url')
 
-const BASE_URL = JSON.parse(process.env.THEEYE_API_URL || JSON.stringify('https://supervisor.theeye.io'))
+const BASE_URL = process.env.THEEYE_API_URL || 'https://supervisor.theeye.io'
 
 class TheEyeIndicatorApi {
 

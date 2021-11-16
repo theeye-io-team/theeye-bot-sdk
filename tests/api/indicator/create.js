@@ -6,7 +6,7 @@ const counter = { type: "counter", value: () => faker.datatype.number() }
 const progress = { type: "progress", value: () => faker.datatype.number(100) }
 
 const accessToken = process.env.ACCESS_TOKEN
-const BASE_URL = JSON.parse(process.env.THEEYE_API_URL || JSON.stringify('https://supervisor.theeye.io'))
+const baseUrl = process.env.THEEYE_API_URL || 'https://supervisor.theeye.io'
 
 const indicatorsCount = (process.argv[2] || 3)
 
