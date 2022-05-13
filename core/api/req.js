@@ -7,15 +7,25 @@ const { URL } = require('url')
 module.exports = (options) => {
   return new Promise((resolve, reject) => {
     const url = new URL(options.url)
+    let requestBody
 
     const request = (url.protocol === 'https:' ? https : http).request
+
+    if (!options.headers) {
+      options.headers = {}
+    }
+
+    // json body.
+    // it requires header: content-type: application/json
+    // also JSON.stringify is required. don't trust the user
+    if (options.json) {
+      options.headers['content-type'] = 'application/json'
+      requestBody = JSON.stringify(options.json)
+    }
 
     const requestOptions = Object.assign({}, options, {
       port: url.port,
       hostname: url.hostname,
-      headers: {
-        'content-type': 'application/json'
-      },
       path: `${url.pathname}${url.search}`
     })
 
@@ -51,14 +61,6 @@ module.exports = (options) => {
 
     req.on('error', reject)
 
-    // json body.
-    // it requires header: content-type: application/json
-    // also JSON.stringify is required. don't trust the user
-    if (options.json) {
-      req.headers['content-type'] = 'application/json'
-      req.write(JSON.stringify(options.json))
-    }
-
     if (options.formData) {
       /**
        * already integrated with FormData
@@ -69,6 +71,9 @@ module.exports = (options) => {
        **/
       options.formData.pipe(req)
     } else {
+      if (requestBody) {
+        req.write(requestBody)
+      }
       req.end()
     }
   })

@@ -5,17 +5,17 @@ const text = { type: "text", value: () => faker.random.words() }
 const counter = { type: "counter", value: () => faker.datatype.number() }
 const progress = { type: "progress", value: () => faker.datatype.number(100) }
 
-const accessToken = process.env.ACCESS_TOKEN
+const ACCESS_TOKEN = process.env.ACCESS_TOKEN
 const BASE_URL = JSON.parse(process.env.THEEYE_API_URL || JSON.stringify('https://supervisor.theeye.io'))
 
 const indicatorsCount = (process.argv[2] || 3)
 
-const main = async () => {
+const main = module.exports = async () => {
   const indicators = []
 
   for (let index = 0; index < indicatorsCount; index++) {
     const properties = generateProperties()
-    const indicator = new Indicator(properties, { baseUrl, accessToken })
+    const indicator = new Indicator(properties, { baseUrl: BASE_URL, accessToken: ACCESS_TOKEN })
     await indicator.save()
     indicators.push( indicator.properties.id )
   }
