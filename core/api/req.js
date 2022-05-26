@@ -2,8 +2,6 @@ const https = require('https')
 const http = require('http')
 const { URL } = require('url')
 
-// const FormData = require('form-data')
-
 module.exports = (options) => {
   return new Promise((resolve, reject) => {
     const url = new URL(options.url)
@@ -62,13 +60,6 @@ module.exports = (options) => {
     req.on('error', reject)
 
     if (options.formData) {
-      /**
-       * already integrated with FormData
-       * const formData = new FormData()
-       * for (let field of options.formData) {
-       *   formData.append(field, options.formData[field])
-       * }
-       **/
       options.formData.pipe(req)
     } else {
       if (requestBody) {
