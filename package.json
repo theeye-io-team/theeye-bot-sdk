@@ -4,24 +4,26 @@
   "description": "NodeJS SDK",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "release": "npx standard-version -t ''"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/theeye-io/theeye-bot-sdk.git"
+    "url": "git+https://github.com/theeye-io-team/theeye-bot-sdk.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/theeye-io/theeye-bot-sdk/issues"
+    "url": "https://github.com/theeye-io-team/theeye-bot-sdk/issues"
   },
-  "homepage": "https://github.com/theeye-io/theeye-bot-sdk#readme",
+  "homepage": "https://github.com/theeye-io-team/theeye-bot-sdk#readme",
   "dependencies": {
     "debug": "~4.3.1",
     "faker": "~5.5.3",
-    "got": "~11.8.5"
+    "got": "~11.8.5",
+    "standard-version": "~9.5.0"
   },
   "devDependencies": {
-    "webpack": "~5.73.0"
+    "webpack": "~5.89.0"
   }
 }
