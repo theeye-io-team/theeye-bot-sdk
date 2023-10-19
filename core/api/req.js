@@ -13,12 +13,21 @@ module.exports = (options) => {
       options.headers = {}
     }
 
+    if (options.formData) {
+      options.headers = Object.assign(
+        {},
+        options.headers,
+        options.formData.getHeaders()
+      )
+    }
+
     // json body.
     // it requires header: content-type: application/json
     // also JSON.stringify is required. don't trust the user
     if (options.json) {
-      options.headers['content-type'] = 'application/json'
       requestBody = JSON.stringify(options.json)
+      options.headers['content-type'] = 'application/json; charset=utf-8'
+      options.headers['content-length'] = Buffer.byteLength(requestBody, 'utf8')
     }
 
     const requestOptions = Object.assign({}, options, {
@@ -28,7 +37,6 @@ module.exports = (options) => {
     })
 
     const req = request(requestOptions)
-
     req.on('response', res => {
       const data = []
 
@@ -37,7 +45,7 @@ module.exports = (options) => {
       })
 
       res.on('end', () => {
-        let payload;
+        let payload
         const buffer = Buffer.concat(data).toString()
 
         // assuming that the response is always JSON.
@@ -50,6 +58,14 @@ module.exports = (options) => {
         }
         //}
         res.body = payload
+
+        if (res.statusCode >= 400) {
+          const err = new Error(`${res.statusCode}: ${res.body?.message||res.body}`)
+          err.response = res
+          err.request = req
+          reject(err)
+          return
+        }
 
         // return the response object.
         // assign the body to a response property body
