@@ -1,112 +1,125 @@
-const debug = require('debug')('theeye:indicator')
+const got = require('got')
 
-const BASE_URL = JSON.parse(process.env.THEEYE_API_URL || JSON.stringify('https://supervisor.theeye.io'))
+const BASE_URL = JSON.parse(process.env.THEEYE_API_URL || '"https://supervisor.theeye.io"')
+const THEEYE_ACCESS_TOKEN = process.env.THEEYE_ACCESS_TOKEN
 
-const Request = require('../req')
+class TheEyeIndicator {
 
-class TheEyeIndicatorApi {
+  constructor (title, type, order) {
+    this.apiURL = BASE_URL
+    this.customerName = JSON.parse(process.env.THEEYE_ORGANIZATION_NAME || 'null')
 
-  constructor (properties = {}, settings = {}) {
+    this.title = title
+    this.type = (type || 'text')
+    this.order = (order || 0)
 
-    const { title, type } = properties
-
-    if (!title) {
-      throw new Error('Indicator "title" is requiered')
+    if (TheEyeIndicator.accessToken) {
+      this.accessToken = TheEyeIndicator.accessToken
     }
+  }
 
-    this.settings = {}
-    this.properties = {}
-
-    Object.assign(this.settings, settings)
-    Object.assign(this.properties, properties)
-
-    this.properties.type = (type || 'text')
+  set (values) {
+    for (let prop in values) {
+      this[prop] = values[prop]
+    }
+    return this
   }
 
   get url () {
-    const titleURLEncoded = encodeURIComponent(this.properties.title)
-    const rootURL = `${this.baseUrl}/indicator`
+    const titleURLEncoded = encodeURIComponent(this.title)
+    const url = `${this.apiURL}/indicator/title/${titleURLEncoded}?access_token=${this.accessToken}`
 
-    let url
-    if (this.properties.id) {
-      url = `${rootURL}/title/${titleURLEncoded}?access_token=${this.accessToken}`
-    } else {
-      url = `${rootURL}?access_token=${this.accessToken}`
+    if (this.customerName) {
+      return `${url}&customer=${this.customerName}`
     }
+
     return url
   }
 
-  get baseUrl () {
-    return this.settings.baseUrl || BASE_URL
-  }
-
-  get accessToken () {
-    const token = this.settings.accessToken || process.env.THEEYE_ACCESS_TOKEN
-    return token
-  }
-
-  static Fetch (options = {}) {
-    let { baseUrl, accessToken } = options
-
-    baseUrl || (baseUrl = BASE_URL)
-
-    const fetchApi = `${baseUrl}/indicator?access_token=${accessToken}`
-    const request = Request({ url: fetchApi, method: 'get' })
-    return request.then(response => {
-
-      if (response.statusCode < 200 || response.statusCode > 300) {
-        throw new Error(`${response.statusCode}: ${response.body}`)
-      }
-
-      const payload = response.body
-      const indicators = []
-      for (let properties of payload) {
-        indicators.push( new TheEyeIndicatorApi(properties, { baseUrl, accessToken }) )
-      }
-
-      return indicators
-    })
-  }
-
-  save () {
-    let request
-    if (this.properties.id) {
-      request = Request({
-        url: this.url,
-        method: 'put', 
-        json: this.properties
-      })
-    } else {
-      request = Request({
-        url: this.url,
-        method: 'post',
-        json: this.properties
-      })
+  async put () {
+    const payload = {
+      title: this.title,
+      state: this.state,
+      value: this.value,
+      type: this.type,
+      order: this.order,
+      severity: this.severity,
+      acl: this.acl,
+      tags: this.tags
     }
 
-    return request.then(response => {
+    let response
 
-      if (response.statusCode < 200 || response.statusCode > 300) {
-        throw new Error(`${response.statusCode}: ${response.body}`)
-      }
+    try {
+      response = await got.put(this.url, {
+        json: payload,
+        responseType: 'json'
+      })
+    } catch (err) {
+      const reqErr = new Error(`${err.response.statusCode}: ${JSON.stringify(err.response.body)}`)
+      console.error(reqErr)
+      response = err
+    }
 
-      const body = response.body
-      Object.assign(this.properties, body)
+    return response
+  }
 
-      debug(response.body, response.statusCode)
-      return this
+  static Fetch () {
+    const url = `${BASE_URL}/indicator?access_token=${TheEyeIndicator.accessToken}`
+    return got(url).catch(err => {
+      const reqErr = new Error(`${err.response.statusCode}: ${err.response.body}`)
+      console.error(reqErr)
+      return err.response
     })
   }
 
-  destroy () {
-    return Request({ url: this.url, method: 'delete' }).then( response => {
-      if (response.statusCode < 200 || response.statusCode > 300) {
-        throw new Error(`${response.statusCode}: ${response.body}`)
-      }
-      debug(response.body, response.statusCode)
-      return this
-    })
+  static async Get (key) {
+    let url
+    if (key.id) {
+      url = `${BASE_URL}/indicator/${id}?access_token=${TheEyeIndicator.accessToken}`
+    } else if (key.title) {
+      url = `${BASE_URL}/indicator/title/${key.title}?access_token=${TheEyeIndicator.accessToken}`
+    }
+
+    const response = await got(url, { responseType: 'json' })
+    const values = response.body
+
+    const indicator = new TheEyeIndicator()
+    indicator.set(values)
+    return indicator
+  }
+
+  async patch (payload) {
+    let response
+
+    try {
+      response = await got.patch(this.url, {
+        json: payload,
+        responseType: 'json'
+      })
+    } catch (err) {
+      const reqErr = new Error(`${err.response.statusCode}: ${JSON.stringify(err.response.body)}`)
+      console.error(reqErr)
+    }
+
+    return response
+  }
+
+  async remove () {
+    let response
+    try {
+      response = await got.delete(this.url)
+    } catch (err) {
+      const reqErr = new Error(`${err.response.statusCode}: ${err.response.body}`)
+      console.error(reqErr)
+    }
+
+    return response
   }
 }
 
-module.exports = TheEyeIndicatorApi
+if (THEEYE_ACCESS_TOKEN) {
+  TheEyeIndicator.accessToken = THEEYE_ACCESS_TOKEN
+}
+
+module.exports = TheEyeIndicator

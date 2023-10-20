@@ -11,7 +11,19 @@ class TheEyeFile {
   #props;
 
   constructor (props) {
-    this.#props = props
+    if (!props.filename) {
+      throw new Error('filename required')
+    }
+
+    this.#props = Object.assign({}, {
+      acl: [],
+      filename: '',
+      mimetype: '',
+      description: '',
+      extension: '',
+    }, props)
+
+    this.content = props.content
   }
 
   set content (content) {
@@ -22,7 +34,7 @@ class TheEyeFile {
   }
 
   prepareFormData () {
-    let { content, filename, mimetype, description, acl, extension } = this.#props
+    let { content, filename, mimetype, description, acl = [], extension } = this.#props
 
     const file = new Readable()
     // CONTENT
@@ -35,6 +47,12 @@ class TheEyeFile {
     }
 
     const formData = new FormData()
+    //this is not supported yet.
+    //if (Array.isArray(acl)) {
+    //  for (let i=0; i<acl.length; i++) {
+    //    formData.append('acl[]', acl[i])
+    //  }
+    //}
     formData.append('acl', JSON.stringify(acl))
     formData.append('description', description)
     formData.append('extension', extension)
