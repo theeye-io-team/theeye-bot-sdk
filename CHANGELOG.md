@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.4](https://github.com/theeye-io-team/theeye-bot-sdk/compare/1.0.3...1.0.4) (2023-11-02)
+
+
+### Bug Fixes
+
+* mail send attachments validation ([8830014](https://github.com/theeye-io-team/theeye-bot-sdk/commit/8830014369fb4637b2d940e5af41aed6c028399d))
+
 ### [1.0.3](https://github.com/theeye-io-team/theeye-bot-sdk/compare/1.0.2...1.0.3) (2023-10-20)
 
 ### [1.0.2](https://github.com/theeye-io-team/theeye-bot-sdk/compare/1.0.1...1.0.2) (2023-10-20)
