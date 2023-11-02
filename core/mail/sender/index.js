@@ -5,16 +5,18 @@ const config = require('../../config').decrypt()
 const path = require('path')
 
 const main = module.exports = async ([ subject, to, html, files ]) => {
-  if (!Array.isArray(files)) {
-    files = [ files ]
-  }
-
   const attachments = []
-  for (let index = 0; index < files.length; index++) {
-    attachments.push({
-      filename: path.basename(files[index]),
-      path: files[index]
-    })
+  if (files) {
+    if (!Array.isArray(files)) {
+      files = [ files ]
+    }
+
+    for (let index = 0; index < files.length; index++) {
+      attachments.push({
+        filename: path.basename(files[index]),
+        path: files[index]
+      })
+    }
   }
 
   const email = {
