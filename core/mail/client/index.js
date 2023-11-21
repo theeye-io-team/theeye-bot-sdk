@@ -6,11 +6,10 @@ const got = require('got')
 const { simpleParser } = require('mailparser')
 const tnef = require('node-tnef')
 const mime = require('mime-types')
-const logger = require('./logger')('mailbot')
-
-const EscapedRegExp = require('./escaped-regexp')
-
 const crypto = require('crypto')
+
+const logger = require('../../logger')('mailbot')
+const EscapedRegExp = require('../../escaped-regexp')
 
 const IGNORE_MESSAGES_TIMEZONE = false
 const USE_SERVER_RECEIVED_DATE = false
