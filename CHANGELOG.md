@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.5](https://github.com/theeye-io-team/theeye-bot-sdk/compare/1.0.4...1.0.5) (2023-11-21)
+
+
+### Bug Fixes
+
+* dependencies ([c8d1f80](https://github.com/theeye-io-team/theeye-bot-sdk/commit/c8d1f80e1971cd982d3df4fe4349fbc5884be056))
+
 ### [1.0.4](https://github.com/theeye-io-team/theeye-bot-sdk/compare/1.0.3...1.0.4) (2023-11-02)
 
 
