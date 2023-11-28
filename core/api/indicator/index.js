@@ -1,12 +1,12 @@
 const got = require('got')
 
-const BASE_URL = JSON.parse(process.env.THEEYE_API_URL || '"https://supervisor.theeye.io"')
+const THEEYE_BASE_URL = JSON.parse(process.env.THEEYE_API_URL || '"https://supervisor.theeye.io"')
 const THEEYE_ACCESS_TOKEN = process.env.THEEYE_ACCESS_TOKEN
 
 class TheEyeIndicator {
 
   constructor (title, type, order) {
-    this.apiURL = BASE_URL
+    this.apiURL = THEEYE_BASE_URL
     this.customerName = JSON.parse(process.env.THEEYE_ORGANIZATION_NAME || 'null')
 
     this.title = title
@@ -65,7 +65,7 @@ class TheEyeIndicator {
   }
 
   static Fetch () {
-    const url = `${BASE_URL}/indicator?access_token=${TheEyeIndicator.accessToken}`
+    const url = `${THEEYE_BASE_URL}/indicator?access_token=${TheEyeIndicator.accessToken}`
     return got(url).catch(err => {
       const reqErr = new Error(`${err.response.statusCode}: ${err.response.body}`)
       console.error(reqErr)
@@ -76,9 +76,9 @@ class TheEyeIndicator {
   static async Get (key) {
     let url
     if (key.id) {
-      url = `${BASE_URL}/indicator/${id}?access_token=${TheEyeIndicator.accessToken}`
+      url = `${THEEYE_BASE_URL}/indicator/${id}?access_token=${TheEyeIndicator.accessToken}`
     } else if (key.title) {
-      url = `${BASE_URL}/indicator/title/${key.title}?access_token=${TheEyeIndicator.accessToken}`
+      url = `${THEEYE_BASE_URL}/indicator/title/${key.title}?access_token=${TheEyeIndicator.accessToken}`
     }
 
     const response = await got(url, { responseType: 'json' })

@@ -1,11 +1,38 @@
 const got = require('got')
 
-class TaskApi {
+const THEEYE_ACCESS_TOKEN = process.env.THEEYE_ACCESS_TOKEN
+
+const THEEYE_BASE_URL = JSON.parse(process.env.THEEYE_API_URL || '"https://supervisor.theeye.io"')
+
+class TheEyeTask {
   constructor (specs = {}) {
-    const apiUrl = JSON.parse(process.env.THEEYE_API_URL)
-    this.customerName = JSON.parse(process.env.THEEYE_ORGANIZATION_NAME)
-    //this.accessToken = JSON.parse(process.env.THEEYE_API_ACCESS_TOKEN)
-    this.urlRoot = `${apiUrl}/${this.customerName}/task`
+    this.apiUrl = (specs.apiUrl || THEEYE_BASE_URL)
+    this.customerName = specs.customerName
+
+    if (!this.customerName) {
+      if (process.env.THEEYE_ORGANIZATION_NAME) {
+        try {
+          this.customerName = JSON.parse(process.env.THEEYE_ORGANIZATION_NAME)
+        } catch (err) {
+          console.error(err.message)
+          this.customerName = null
+        }
+      }
+    }
+
+    this.id = (specs.id || process.env.TASK_ID)
+    this.secret = (specs.secret || process.env.TASK_SECRET)
+
+
+    if (this.customerName) {
+      this.urlRoot = `${this.apiUrl}/${this.customerName}/task`
+    } else {
+      this.urlRoot = `${this.apiUrl}/task`
+    }
+
+    if (TheEyeTask.accessToken) {
+      this.accessToken = TheEyeIndicator.accessToken
+    }
   }
 
   /**
@@ -19,8 +46,8 @@ class TaskApi {
   async run (options = {}) {
     let { id, secret } = options
     
-    id || (id = process.env.TASK_ID)
-    secret || (secret = process.env.TASK_SECRET)
+    id || (id = this.id)
+    secret || (secret = this.secret)
     
     if (!secret && !this.accessToken) {
       throw new Error('missing credentials: access token or secret required')
@@ -30,7 +57,12 @@ class TaskApi {
       throw new Error('task_arguments: array expected')
     }
 
-    const body = (options.task_arguments || options.body)
+    let body
+    if (options.task_arguments) {
+      body = { task_arguments: options.task_arguments }
+    } else if (options.body) {
+      body = options.body
+    }
     
     let url
     if (secret) {
@@ -55,4 +87,8 @@ class TaskApi {
   }
 }
 
-module.exports = TaskApi
+if (THEEYE_ACCESS_TOKEN) {
+  TheEyeIndicator.accessToken = THEEYE_ACCESS_TOKEN
+}
+
+module.exports = TheEyeTask
