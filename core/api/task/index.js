@@ -82,7 +82,7 @@ class TheEyeTask {
       return response.body
     } catch (err) {
       console.log(err.message)
-      throw new Error(`[${err.response.statusCode}] ${err.response.body}`)
+      throw new Error(`[${err.response.statusCode}] ${err.response.body?.message}`)
     }
   }
 }

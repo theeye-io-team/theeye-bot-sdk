@@ -1,3 +1,8 @@
+
+const path = require('path')
+const dotenv = (process.env.DOTENV_PATH)
+require('dotenv').config({ path: dotenv })
+
 // error and output handlers must go first.
 
 /**
@@ -6,14 +11,9 @@
  * @prop {Array} components
  * @prop {Object} next
  */
-const successOutput = ({ data, components, next }) => {
+const successOutput = (options = {}) => {
   // https://documentation.theeye.io/core-concepts/scripts/#passing-arguments-in-workflow
-  const output = {
-    state: "success",
-    data,
-    components, // https://documentation.theeye.io/core-concepts/tasks/script_type/#components
-    next
-  }
+  const output = Object.assign({ state: 'success' }, options)
   console.log( JSON.stringify(output) )
   process.exit(0)
 }
@@ -28,7 +28,7 @@ const failureOutput = (err) => {
     data: {
       message: err.message,
       code: err.code,
-      data: err.data 
+      data: err.data
     }
   }
   console.error( JSON.stringify(output) )
@@ -45,103 +45,30 @@ process.on('uncaughtException', err => {
   failureOutput(err)
 })
 
-/**
- *
- * Sample usage:
- *
- *   const TheEyeBoilerplate = require('boilerplate')
- *   TheEyeBoilerplate.run('./script.js')
- *
- */
-class TheEyeBoilerplate {
-  constructor (handlerPath) {
-    try {
-      const handler = require(handlerPath)
-      this.handler = handler
-    } catch (err) {
-      throw new Error(`Handler ${handlerPath} not found`)
-    }
-  }
+process.once('SIGINT', function (code) {
+  console.log('SIGINT received');
+  const err = new Error('SIGINT received')
+  err.code = code
+  failureOutput(err)
+})
 
-  async run (args = undefined) {
+process.once('SIGTERM', function (code) {
+  console.log('SIGTERM received...');
+  const err = new Error('SIGTERM received')
+  err.code = code
+  failureOutput(err)
+})
+
+const createHandler = exports.createHandler = (main) => {
+  // create a function ready to be executed
+  return (args = undefined) => {
+    // arguments are optional.
+    // if arguments are not provided process.argv will be used as arguments
     args || (args = process.argv.slice(2))
-
-    // collect handler result
-    await this.execute(args)
-
-    // generate the lastline
-    this.report()
-
-    return this
-  }
-
-  /*
-   * @param {Array} args
-   * @return {TheEyeBoilerplate}
-   */
-  async execute (args) {
-    try {
-      const value = this.handler(args)
-      let output
-      if (value instanceof Promise) {
-        // await promise resolve
-        output = await value
-      } else {
-        output = value
-      }
-
-      if (
-        output !== undefined &&
-        output !== null &&
-        output.hasOwnProperty('data')
-      ) {
-        this.output = output
-      } else {
-        this.output = { data: output }
-      }
-    } catch (err) {
-      this.err = err
-    }
-
-    return this
-  }
-
-  report () {
-    if (this.err) {
-      failureOutput(this.err)
-    } else {
-      successOutput(this.output)
-    }
+    main(args).then(successOutput).catch(failureOutput)
   }
 }
 
-/**
- * @return {Promise}
- */
-TheEyeBoilerplate.run = (handlerPath, args) => {
-  const theeye = new TheEyeBoilerplate(handlerPath)
-  return theeye.run(args)
-}
-
-const main = () => {
-  const handler = process.argv[2]
-  const args = process.argv.slice(3)
-
-  if (process.argv.length === 2) {
-    console.log(`Help.
-      Invalid arguments length.
-      Usage
-      node lib/boilerplate "script_path" [...arguments]
-      `)
-
-    process.exit(1)
-  }
-
-  return TheEyeBoilerplate.run(handler, args)
-}
-
-module.exports = TheEyeBoilerplate
-
-if (require.main === module) {
-  main().then(console.log).catch(console.error)
+const executeHandler = exports.executeHandler = async (main, args) => {
+  return createHandler(main)(args)
 }
