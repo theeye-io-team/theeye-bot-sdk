@@ -59,13 +59,25 @@ process.once('SIGTERM', function (code) {
   failureOutput(err)
 })
 
-const createHandler = exports.createHandler = (main) => {
+const createHandler = exports.createHandler = (main, caller = undefined) => {
   // create a function ready to be executed
-  return (args = undefined) => {
-    // arguments are optional.
-    // if arguments are not provided process.argv will be used as arguments
-    args || (args = process.argv.slice(2))
-    main(args).then(successOutput).catch(failureOutput)
+  const handler = (args = undefined) => {
+    try {
+      // arguments are optional.
+      // if arguments are not provided process.argv will be used as arguments
+      args || (args = process.argv.slice(2))
+      const result = await main(args)
+      successOutput(result)
+    } catch (err) {
+      failureOutput(err)
+    }
+  }
+
+  // if the handled function script was executed directly, run the handler
+  if (caller && require.main === caller) {
+    return handler()
+  } else {
+    return handler
   }
 }
 
