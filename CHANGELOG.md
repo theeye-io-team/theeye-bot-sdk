@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.1](https://github.com/theeye-io-team/theeye-bot-sdk/compare/1.1.0...1.1.1) (2023-12-05)
+
+
+### Bug Fixes
+
+* **boilerplate:** main fn can not be a Promise ([408a90f](https://github.com/theeye-io-team/theeye-bot-sdk/commit/408a90f6d275c8ae7ca290d1bba89deead2d4121))
+
 ## [1.1.0](https://github.com/theeye-io-team/theeye-bot-sdk/compare/1.0.6...1.1.0) (2023-12-05)
 
 
