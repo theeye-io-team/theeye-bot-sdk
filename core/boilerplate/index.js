@@ -61,7 +61,7 @@ process.once('SIGTERM', function (code) {
 
 const createHandler = exports.createHandler = (main, caller = undefined) => {
   // create a function ready to be executed
-  const handler = (args = undefined) => {
+  const handler = async (args = undefined) => {
     try {
       // arguments are optional.
       // if arguments are not provided process.argv will be used as arguments
