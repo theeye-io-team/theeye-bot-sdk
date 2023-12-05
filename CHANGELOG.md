@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://github.com/theeye-io-team/theeye-bot-sdk/compare/1.0.6...1.1.0) (2023-12-05)
+
+
+### Features
+
+* boilerplate ([716e82f](https://github.com/theeye-io-team/theeye-bot-sdk/commit/716e82f6cc439d299e6d54e87000197524784bdf))
+* error handler added ([e374fff](https://github.com/theeye-io-team/theeye-bot-sdk/commit/e374fff8fa8fecc056324eff7db1a5457affd27b))
+
 ### [1.0.6](https://github.com/theeye-io-team/theeye-bot-sdk/compare/1.0.5...1.0.6) (2023-11-28)
 
 
