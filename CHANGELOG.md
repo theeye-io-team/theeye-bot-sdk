@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.0.0](https://github.com/theeye-io-team/theeye-bot-sdk/compare/1.1.2...2.0.0) (2024-01-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* **mail/sender:** input payload changed to support many unordered arguments
+
+* **mail/sender:** sendmail input changed from [] => {} [#2](https://github.com/theeye-io-team/theeye-bot-sdk/issues/2) ([d3876a0](https://github.com/theeye-io-team/theeye-bot-sdk/commit/d3876a046e9a86fcc40c45b19dca59efea06c33a))
+
 ### [1.1.2](https://github.com/theeye-io-team/theeye-bot-sdk/compare/1.1.1...1.1.2) (2023-12-05)
 
 
