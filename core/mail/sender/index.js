@@ -4,7 +4,7 @@ const debug = require('debug')('email:smtp')
 const config = require('../../config').decrypt()
 const path = require('path')
 
-const main = module.exports = async ([ subject, to, html, files ]) => {
+const main = module.exports = async ({ subject, to, html, text, files, cc }) => {
   const attachments = []
   if (files) {
     if (!Array.isArray(files)) {
@@ -23,9 +23,11 @@ const main = module.exports = async ([ subject, to, html, files ]) => {
     from: config.sender.from,
     to,
     subject,
-    html,
     attachments
   }
+  if (text) { email.text = text }
+  if (html) { email.html = html }
+  if (cc) { email.cc = cc }
 
   debug(email)
   await sendEmail(email)
@@ -46,10 +48,10 @@ const sendEmail = (email) => {
 }
 
 if (require.main === module) {
-  main([
-    process.argv[2], // subject
-    process.argv[3], // to
-    process.argv[4], // html
-    process.argv[5], // attachment path
-  ]).then(console.log).catch(console.error)
+  main({
+    subject: process.argv[2], // subject
+    to: process.argv[3], // to
+    html: process.argv[4], // html
+    files: [ process.argv[5] ], // attachment path
+  }).then(console.log).catch(console.error)
 }
