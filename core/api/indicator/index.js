@@ -90,6 +90,20 @@ class TheEyeIndicator {
   }
 
   async patch (payload) {
+
+    if (!payload) {
+      payload = {
+        title: this.title,
+        state: this.state,
+        value: this.value,
+        type: this.type,
+        order: this.order,
+        severity: this.severity,
+        acl: this.acl,
+        tags: this.tags
+      }
+    }
+
     let response
 
     try {
