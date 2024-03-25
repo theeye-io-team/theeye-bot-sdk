@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.0.1...2.1.0) (2024-03-25)
+
+
+### Features
+
+* **api/indicators:** sort function ([f620c59](https://github.com/theeye-io-team/theeye-bot-sdk/commit/f620c592439e6030ae567e9ed4005ba071659427))
+
 ### [2.0.1](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.0.0...2.0.1) (2024-03-01)
 
 
