@@ -90,7 +90,6 @@ class TheEyeIndicator {
   }
 
   async patch (payload) {
-
     if (!payload) {
       payload = {
         title: this.title,
@@ -129,6 +128,25 @@ class TheEyeIndicator {
     }
 
     return response
+  }
+
+  static async SortByTag (tag, order = 1000, direction = 1) {
+    const { body } = await TheEyeIndicator.Fetch()
+
+    const indicators = JSON.parse(body)
+      .filter(i => i.tags.includes(tag))
+      .sort((elem1, elem2) => {
+        const elem1Date = new Date(elem1.creation_date).getTime()
+        const elem2Date = new Date(elem2.creation_date).getTime()
+        // orden inverso. primero el mas nuevo
+        return ((elem1Date > elem2Date) ? 1 : -1) * direction
+      })
+
+    for (const data of indicators) {
+      const indicator = new TheEyeIndicator(data.title, data.type)
+      await indicator.patch({ order })
+      order++
+    }
   }
 }
 
