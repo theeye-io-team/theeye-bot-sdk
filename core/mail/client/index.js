@@ -195,15 +195,23 @@ class Message {
   }
 
   get body () {
-    return this.data.text
+    return this.data.text || ''
+  }
+
+  get text () {
+    return this.data.text || ''
+  }
+
+  get html () {
+    return this.data.html || ''
   }
 
   async searchBody (rule) {
-    if (rule.mime === 'text') {
-      return this.data.text
+    if (rule.format === 'text') {
+      return this.text
     }
-    if (rule.mime === 'html') {
-      return this.data.html
+    if (rule.format === 'html') {
+      return this.html
     }
   }
 
@@ -255,62 +263,28 @@ class Message {
     return attachments
   }
 
-  async searchBodyAttachments (rules) {
-    const text = this.data.text
+  async searchBodyAttachments (rule) {
     const attachments = []
 
-    if (rules.url_patterns) {
-      for (const urlPattern of rules.url_patterns) {
-        const foundAttachments = text.match(new RegExp(urlPattern.pattern, urlPattern.flags))
+    if (rule.url_patterns) {
+      let bodyFormat = rule.body_format
+      bodyFormat || (bodyFormat = 'text')
+      if (bodyFormat !== 'text' && bodyFormat !== 'html') {
+        throw new Error(`unsupported body format ${bodyFormat}`)
+      }
 
+      const bodyContent = this[bodyFormat]
+
+      for (const urlPattern of rule.url_patterns) {
+        const pattern = new RegExp(urlPattern.pattern, urlPattern.flags)
+        const foundAttachments = bodyContent.match(pattern)
         // Ver de agregar handler para flag g y otros casos (algun dia)
         if (foundAttachments?.length) {
-          let url = foundAttachments[0]
-          // for (let url of foundAttachments) {
-            if (urlPattern.filters) {
-              url = urlPattern.filters.reduce( (url, filter) => {
-                if (filter.type == 'replace') {
-                  const pattern = new RegExp(filter.pattern, filter.flags)
-                  return url.replace(pattern, filter.replacement)
-                } else {
-                  console.log('filter not implemented')
-                  return url
-                }
-              }, url)
-            }
-
-            const fileData = await got(url)
-
-            const matched = fileData.headers['content-disposition'].match(/filename=(.*)/)
-
-            let filename
-            if (
-              matched !== null &&
-              Array.isArray(matched) &&
-              matched[1]
-            ) {
-              filename = matched[1]
-                .split(';')[0]
-                .split('"')
-                .join('')
-                .replace(/[^\w\-.]/,'_')
-            } else {
-              filename ='noname'
-            }
-
-            const shasum = crypto.createHash('md5')
-            shasum.update(fileData.rawBody)
-            const checksum = shasum.digest('hex')
-
-            attachments.push({
-              type: 'inline_url',
-              content: Buffer.from(fileData.rawBody),
-              contentType: fileData.headers['content-type'],
-              filename,
-              checksum,
-              headers: fileData.headers,
-            })
-          //}
+          for (let url of foundAttachments) {
+            url = filterString(url, urlPattern.filters)
+            const attachment = await downloadFile(url)
+            attachments.push(attachment)
+          }
         }
       }
     }
@@ -415,6 +389,55 @@ const streamToString = (stream) => {
     stream.on('error', (err) => reject(err))
     stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')))
   })
+}
+
+const filterString = (str, filters) => {
+  if (!filters?.length) { return str }
+  return filters.reduce( (str, filter) => {
+    if (filter.type == 'replace') {
+      const pattern = new RegExp(filter.pattern, filter.flags)
+      return str.replace(pattern, filter.replacement)
+    } else {
+      console.log('filter not implemented')
+      return str
+    }
+  }, str)
+}
+
+const downloadFile = async (url) => {
+
+  const fileData = await got(url)
+  const disposition = fileData.headers['content-disposition']
+  const matched = disposition ? disposition.match(/filename=(.*)/) : null
+
+  let filename
+  if (
+    matched !== null &&
+    Array.isArray(matched) &&
+    matched[1]
+  ) {
+    filename = matched[1]
+      .split(';')[0]
+      .split('"')
+      .join('')
+      .replace(/[^\w\-.]/,'_')
+  } else {
+    const a = new URL(url)
+    filename = path.basename(a.pathname)
+  }
+
+  const shasum = crypto.createHash('md5')
+  shasum.update(fileData.rawBody)
+  const checksum = shasum.digest('hex')
+
+  return {
+    type: 'body_link',
+    content: Buffer.from(fileData.rawBody),
+    contentType: fileData.headers['content-type'],
+    filename,
+    checksum,
+    headers: fileData.headers,
+  }
 }
 
 module.exports = MailBot
