@@ -198,6 +198,32 @@ class Message {
     return this.data.text
   }
 
+  async searchBody (rule) {
+    if (rule.mime === 'text') {
+      return this.data.text
+    }
+    if (rule.mime === 'html') {
+      return this.data.html
+    }
+  }
+
+  async searchHeaders (rule) {
+    if (Array.isArray(rule.select) && rule.select.length > 0) {
+      const selected = []
+      for (let xx = 0; xx < rule.select.length; xx++) {
+        const key = rule.select[xx]
+        for (let yy = 0; yy < this.data.headerLines.length; yy++) {
+          if (key == this.data.headerLines[yy].key) {
+            selected.push(this.data.headerLines[yy])
+          }
+        }
+      }
+      return selected
+    } else {
+      return this.data.headerLines
+    }
+  }
+
   async searchAttachments (rule) {
     const allowed = rule || this.#mailbot.config.attachments.allowed
     const attachments = []
