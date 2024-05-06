@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.2.0](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.1.0...2.2.0) (2024-05-06)
+
+
+### Features
+
+* mail client body & headers  methods ([21fa6b8](https://github.com/theeye-io-team/theeye-bot-sdk/commit/21fa6b8351d9f39a3e36a4393e1352dcec6abc2a))
+
 ## [2.1.0](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.0.1...2.1.0) (2024-03-25)
 
 
