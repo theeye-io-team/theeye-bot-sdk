@@ -406,7 +406,8 @@ const filterString = (str, filters) => {
 
 const downloadFile = async (url) => {
 
-  const fileData = await got(url)
+  const vurl = new URL(url)
+  const fileData = await got(vurl.href).catch(err => err.response)
   const disposition = fileData.headers['content-disposition']
   const matched = disposition ? disposition.match(/filename=(.*)/) : null
 
