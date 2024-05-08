@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.3.0](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.2.1...2.3.0) (2024-05-08)
+
+
+### Features
+
+* **mail:** metadata api ([#3](https://github.com/theeye-io-team/theeye-bot-sdk/issues/3)) ([17ed198](https://github.com/theeye-io-team/theeye-bot-sdk/commit/17ed198c67ad6419d4e037dcace67073db5b2ce8))
+
+
+### Bug Fixes
+
+* escape url before use ([ccca489](https://github.com/theeye-io-team/theeye-bot-sdk/commit/ccca4897b3ec32bd3cdd402e7fd5e2b4d9212f56))
+
 ### [2.2.1](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.2.0...2.2.1) (2024-05-06)
 
 
