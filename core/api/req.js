@@ -60,7 +60,8 @@ module.exports = (options) => {
         res.body = payload
 
         if (res.statusCode >= 400) {
-          const err = new Error(`${res.statusCode}: ${res.body?.message||res.body}`)
+          const err = new Error(`${res.statusCode}: ${res.body?.message||res.statusMessage}`)
+          err.body = req.body
           err.response = res
           err.request = req
           reject(err)
