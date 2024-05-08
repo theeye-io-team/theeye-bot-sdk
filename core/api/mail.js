@@ -51,7 +51,6 @@ class API {
    *
    */
   upload (payload, content) {
-    
     const formData = new FormData()
     formData.append('payload', JSON.stringify(payload))
     
@@ -68,6 +67,31 @@ class API {
       url:`${this.config.url}/api/Mails/upload?access_token=${this.config.accessToken}`,
       method: 'POST',
       formData
+    }
+
+    return Request(options)
+  }
+
+  /**
+   *
+   * @param {Object} payload
+   * @prop {String} payload.from
+   * @prop {String} payload.body
+   * @prop {String} payload.headers
+   * @prop {String} payload.raw
+   * @prop {String} payload.subject
+   * @prop {String} payload.reception_date
+   * @prop {String} payload.mail_hash
+   * @param {Buffer} content attachment content buffer
+   *
+   * @return Promise
+   *
+   */
+  setMetadata (metadata) {
+    const options = {
+      url:`${this.config.url}/api/Mails/metadata?access_token=${this.config.accessToken}`,
+      method: 'PUT',
+      json: { metadata }
     }
 
     return Request(options)

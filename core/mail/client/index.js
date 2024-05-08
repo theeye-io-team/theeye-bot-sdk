@@ -30,7 +30,8 @@ class MailBot {
       secure: (imapConfig.tls || imapConfig.secure || true),
       auth: {
         user: (imapConfig.user || imapConfig.auth?.user),
-        pass: (imapConfig.password || imapConfig.auth?.pass)
+        pass: (imapConfig.password || imapConfig.auth?.pass),
+        accessToken: (imapConfig.accessToken || imapConfig.auth?.accessToken),
       }
     }
 
