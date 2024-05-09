@@ -4,16 +4,14 @@ const xoauth2token = module.exports = async (config) => {
     tenant_id,
     client_id,
     client_secret,
+    // default values
     scope = 'https://outlook.office.com/.default',
     grant_type = 'client_credentials'
   } = config
  
-  //const body = `client_id=${client_id}&scope=${scope}&client_secret=${client_secret}&grant_type=${grant_type}`
   const url = 'https://login.microsoftonline.com/' + tenant_id + '/oauth2/v2.0/token' 
-  //const headers = { "content-type": "application/x-www-form-urlencoded" }
 
   const response = await got.post(url, {
-    //headers,
     form: {
       tenant_id,
       client_id,
