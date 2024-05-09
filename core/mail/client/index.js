@@ -15,6 +15,8 @@ const IGNORE_MESSAGES_TIMEZONE = false
 const USE_SERVER_RECEIVED_DATE = false
 const TIMEZONE = 'America/Argentina/Buenos_Aires'
 
+const msxoauth2token = require('./msxoauth2token')
+
 class MailBot {
   constructor (config) {
     this.config = config
@@ -22,16 +24,30 @@ class MailBot {
 
   async connect (folder = null) {
     const imapConfig = this.config.imap
+
+    const pass = (imapConfig.password || imapConfig.auth?.pass)
+    const user = (imapConfig.user || imapConfig.auth?.user)
+    let accessToken = (imapConfig.accessToken || imapConfig.auth?.accessToken)
+
     const config = {
       logger: (imapConfig.debug===true?logger:noopLogger),
       emitLogs: (imapConfig.emitLogs || false),
       host: imapConfig.host,
       port: (imapConfig.port || 993),
       secure: (imapConfig.tls || imapConfig.secure || true),
-      auth: {
-        user: (imapConfig.user || imapConfig.auth?.user),
-        pass: (imapConfig.password || imapConfig.auth?.pass),
-        accessToken: (imapConfig.accessToken || imapConfig.auth?.accessToken),
+      auth: { user, pass, accessToken }
+    }
+
+    if (!pass && !accessToken) {
+      const oauthcfg = imapConfig.auth?.msxoauth
+      if (!oauthcfg) {
+        throw new Error('incorrect authentication credentials configuration')
+      } else {
+        const resp = await msxoauth2token(oauthcfg).catch(err => err)
+        if (resp instanceof Error) {
+          throw new Error('msxoauth token failed')
+        }
+        config.auth.accessToken = resp
       }
     }
 
