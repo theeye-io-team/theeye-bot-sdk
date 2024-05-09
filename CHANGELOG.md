@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.4.0](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.3.0...2.4.0) (2024-05-09)
+
+
+### Features
+
+* ms xoauth token authentication ([#4](https://github.com/theeye-io-team/theeye-bot-sdk/issues/4)) ([25a76b5](https://github.com/theeye-io-team/theeye-bot-sdk/commit/25a76b54c1c73dc64119e23881f5524a0374e4b9))
+
 ## [2.3.0](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.2.1...2.3.0) (2024-05-08)
 
 
