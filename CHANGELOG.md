@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.5.0](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.4.0...2.5.0) (2024-05-10)
+
+
+### Features
+
+* **mail:** attachment jsdom parser (html 2 text) ([b2577ed](https://github.com/theeye-io-team/theeye-bot-sdk/commit/b2577ed3e01b3187930ba86d743becd4e83b675c))
+
 ## [2.4.0](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.3.0...2.4.0) (2024-05-09)
 
 
