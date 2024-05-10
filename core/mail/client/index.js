@@ -7,6 +7,7 @@ const { simpleParser } = require('mailparser')
 const tnef = require('node-tnef')
 const mime = require('mime-types')
 const crypto = require('crypto')
+const { JSDOM } = require('jsdom')
 
 const logger = require('../../logger')('mailbot')
 const EscapedRegExp = require('../../escaped-regexp')
@@ -228,7 +229,12 @@ class Message {
       return this.text
     }
     if (rule.format === 'html') {
-      return this.html
+      if (rule.extractText === true) {
+        const dom = new JSDOM(this.html)
+        return dom.window.document.body.textContent
+      } else {
+        return this.html
+      }
     }
   }
 
@@ -283,8 +289,8 @@ class Message {
   async searchBodyAttachments (rule) {
     const attachments = []
 
-    if (rule.url_patterns) {
-      let bodyFormat = rule.body_format
+    if (rule.urlPatterns) {
+      let bodyFormat = rule.bodyFormat
       bodyFormat || (bodyFormat = 'text')
       if (bodyFormat !== 'text' && bodyFormat !== 'html') {
         throw new Error(`unsupported body format ${bodyFormat}`)
@@ -292,7 +298,7 @@ class Message {
 
       const bodyContent = this[bodyFormat]
 
-      for (const urlPattern of rule.url_patterns) {
+      for (const urlPattern of rule.urlPatterns) {
         const pattern = new RegExp(urlPattern.pattern, urlPattern.flags)
         const foundAttachments = bodyContent.match(pattern)
         // Ver de agregar handler para flag g y otros casos (algun dia)

@@ -24,6 +24,7 @@
     "form-data": "~4.0.0",
     "got": "~11.8.6",
     "imapflow": "~1.0.147",
+    "jsdom": "~24.0.0",
     "luxon": "~3.4.4",
     "mailparser": "~3.6.5",
     "mime-types": "~2.1.35",
