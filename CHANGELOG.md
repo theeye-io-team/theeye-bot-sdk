@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.6.1](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.6.0...2.6.1) (2024-06-14)
+
+
+### Bug Fixes
+
+* **session:** incorrect api env ([b817bb3](https://github.com/theeye-io-team/theeye-bot-sdk/commit/b817bb3486a6982d2b6e6da4507d1bc906b6081f))
+
 ## [2.6.0](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.5.0...2.6.0) (2024-06-14)
 
 
