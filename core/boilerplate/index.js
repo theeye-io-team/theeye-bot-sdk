@@ -3,6 +3,8 @@ const path = require('path')
 const dotenv = (process.env.DOTENV_PATH)
 require('dotenv').config({ path: dotenv })
 
+console.log(process.version)
+
 // error and output handlers must go first.
 
 /**
