@@ -1,5 +1,5 @@
 
-const THEEYE_GATEWAY_URL = JSON.parse(process.env.THEEYE_API_URL || '"https://app.theeye.io"')
+const THEEYE_GATEWAY_URL = JSON.parse(process.env.THEEYE_GATEWAY_URL || '"https://app.theeye.io"')
 const THEEYE_ACCESS_TOKEN = process.env.THEEYE_ACCESS_TOKEN
 
 const axios = require('axios')
