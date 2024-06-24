@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.6.2](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.6.1...2.6.2) (2024-06-24)
+
+
+### Bug Fixes
+
+* **indicator:** undefined reference id ([8098fc6](https://github.com/theeye-io-team/theeye-bot-sdk/commit/8098fc6c9841465df0b7f8b7ce6bcf4d488eaf1f))
+
 ### [2.6.1](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.6.0...2.6.1) (2024-06-14)
 
 
