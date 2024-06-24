@@ -76,7 +76,7 @@ class TheEyeIndicator {
   static async Get (key) {
     let url
     if (key.id) {
-      url = `${THEEYE_BASE_URL}/indicator/${id}?access_token=${TheEyeIndicator.accessToken}`
+      url = `${THEEYE_BASE_URL}/indicator/${key.id}?access_token=${TheEyeIndicator.accessToken}`
     } else if (key.title) {
       url = `${THEEYE_BASE_URL}/indicator/title/${key.title}?access_token=${TheEyeIndicator.accessToken}`
     }
