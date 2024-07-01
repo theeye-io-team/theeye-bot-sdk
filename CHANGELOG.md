@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.7.0](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.6.2...2.7.0) (2024-07-01)
+
+
+### Features
+
+* fetch api ([e54afde](https://github.com/theeye-io-team/theeye-bot-sdk/commit/e54afde3e1fa1f2529334ff0d72bbacfcbfd9cea))
+
+
+### Bug Fixes
+
+* task api ([291c98d](https://github.com/theeye-io-team/theeye-bot-sdk/commit/291c98d35bb90dd60fe5ad49cc19b7f413650010))
+
 ### [2.6.2](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.6.1...2.6.2) (2024-06-24)
 
 
