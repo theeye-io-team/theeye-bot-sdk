@@ -23,7 +23,6 @@ class TheEyeTask {
     this.id = (specs.id || process.env.TASK_ID)
     this.secret = (specs.secret || process.env.TASK_SECRET)
 
-
     if (this.customerName) {
       this.urlRoot = `${this.apiUrl}/${this.customerName}/task`
     } else {
@@ -31,7 +30,7 @@ class TheEyeTask {
     }
 
     if (TheEyeTask.accessToken) {
-      this.accessToken = TheEyeIndicator.accessToken
+      this.accessToken = TheEyeTask.accessToken
     }
   }
 
@@ -88,7 +87,7 @@ class TheEyeTask {
 }
 
 if (THEEYE_ACCESS_TOKEN) {
-  TheEyeIndicator.accessToken = THEEYE_ACCESS_TOKEN
+  TheEyeTask.accessToken = THEEYE_ACCESS_TOKEN
 }
 
 module.exports = TheEyeTask

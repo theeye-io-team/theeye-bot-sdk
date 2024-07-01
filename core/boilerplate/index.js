@@ -1,5 +1,13 @@
 
 const path = require('path')
+
+// set environment variables
+process.env.THEEYE_JOB = JSON.stringify({ id: '', task_id: '' })
+process.env.THEEYE_JOB_USER = JSON.stringify({ id: '', email: '', username: '' })
+process.env.THEEYE_JOB_WORKFLOW = JSON.stringify({ job_id: '', id: '' })
+process.env.THEEYE_ORGANIZATION_NAME = JSON.stringify('')
+process.env.THEEYE_API_URL = JSON.stringify('https://supervisor.theeye.io')
+
 const dotenv = (process.env.DOTENV_PATH)
 require('dotenv').config({ path: dotenv })
 
