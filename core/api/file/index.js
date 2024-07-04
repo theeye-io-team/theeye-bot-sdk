@@ -1,5 +1,5 @@
 const path = require('path')
-const Request = require('./req')
+const Request = require('../req')
 const FormData = require('form-data')
 const Readable = require('stream').Readable
 
