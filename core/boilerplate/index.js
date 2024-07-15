@@ -11,7 +11,8 @@ process.env.THEEYE_API_URL = JSON.stringify('https://supervisor.theeye.io')
 const dotenv = (process.env.DOTENV_PATH)
 require('dotenv').config({ path: dotenv })
 
-console.log(process.version)
+console.log('theeye-bot-sdk')
+console.log(`node version: ${process.version}`)
 
 // error and output handlers must go first.
 
@@ -70,6 +71,7 @@ process.once('SIGTERM', function (code) {
 })
 
 const createHandler = exports.createHandler = (main, caller = undefined) => {
+  console.log(`Boilerplate handler created for ${process.argv[1]}`)
   // create a function ready to be executed
   const handler = async (args = undefined) => {
     try {
