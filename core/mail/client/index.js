@@ -16,7 +16,7 @@ const IGNORE_MESSAGES_TIMEZONE = false
 const USE_SERVER_RECEIVED_DATE = false
 const TIMEZONE = 'America/Argentina/Buenos_Aires'
 
-const msxoauth2token = require('./msxoauth2token')
+const Authentication = require('../../authentication')
 
 class MailBot {
   constructor (config) {
@@ -26,9 +26,16 @@ class MailBot {
   async connect (folder = null) {
     const imapConfig = this.config.imap
 
-    const pass = (imapConfig.password || imapConfig.auth?.pass)
-    const user = (imapConfig.user || imapConfig.auth?.user)
-    let accessToken = (imapConfig.accessToken || imapConfig.auth?.accessToken)
+    const auth = await Authentication(
+      Object.assign(
+        {
+          user: imapConfig.user,
+          pass: imapConfig.password,
+          accessToken: imapConfig.accessToken
+        },
+        imapConfig.auth
+      )
+    )
 
     const config = {
       logger: (imapConfig.debug===true?logger:noopLogger),
@@ -36,25 +43,12 @@ class MailBot {
       host: imapConfig.host,
       port: (imapConfig.port || 993),
       secure: (imapConfig.tls || imapConfig.secure || true),
-      auth: { user, pass, accessToken }
-    }
-
-    if (!pass && !accessToken) {
-      const oauthcfg = imapConfig.auth?.msxoauth
-      if (!oauthcfg) {
-        throw new Error('incorrect authentication credentials configuration')
-      } else {
-        const resp = await msxoauth2token(oauthcfg).catch(err => err)
-        if (resp instanceof Error) {
-          throw new Error('msxoauth token failed')
-        }
-        config.auth.accessToken = resp
-      }
+      auth
     }
 
     const client = new ImapFlow(config)
     await client.connect()
-    this.mailboxLock = await client.getMailboxLock(folder || this.config.folders.INBOX)
+    this.mailboxLock = await client.getMailboxLock(folder || this.config.folders?.INBOX)
 
     this.connection = client
 
@@ -104,6 +98,10 @@ class MailBot {
     return searchResult.map(seq => new Message(seq, this))
   }
 
+  disconnect () {
+    return this.closeConnection()
+  }
+
   closeConnection () {
     if (this.mailboxLock) {
       this.mailboxLock.release()
@@ -142,7 +140,7 @@ class Message {
       return
     }
 
-    folder || (folder = this.#mailbot.config.folders.processed)
+    folder || (folder = this.#mailbot.config.folders?.processed)
 
     if (!folder) {
       throw new Error(`Target folder to move messages needed`)
@@ -256,7 +254,7 @@ class Message {
   }
 
   async searchAttachments (rule) {
-    const allowed = rule || this.#mailbot.config.attachments.allowed
+    const allowed = rule || this.#mailbot.config.attachments?.allowed
     const attachments = []
 
     if (this.data.attachments.length) {
