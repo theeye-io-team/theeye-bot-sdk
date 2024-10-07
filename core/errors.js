@@ -57,7 +57,7 @@ class ErrorHandler {
   }
 
   toJSON () {
-    return this.toObject()
+    return this.toString()
   }
 
   toHtml () {
@@ -71,6 +71,20 @@ class ErrorHandler {
   hasErrors () {
     return this.errors.length > 0
   }
+}
+
+ErrorHandler.Factory = function (definition) {
+  const { message , code, name, stack } = definition
+  let err
+  if (ErrorHandler[name]) {
+    err = new ErrorHandler[name](message)
+  } else {
+    err = new Error(message)
+  }
+  err.code = code
+  err.name = name
+  err.stack = stack
+  return err
 }
 
 module.exports = ErrorHandler
@@ -90,9 +104,9 @@ const htmlErrorLine = (error) => {
 }
 
 class ExtendedError extends Error {
-  constructor (message, details) {
+  constructor (message, options) {
     super(message)
-    this.details = details
+    Object.assign(this, options)
     this.name = this.constructor.name
   }
 
@@ -114,20 +128,53 @@ class ExtendedError extends Error {
   toJSON () {
     return this.toObject()
   }
-}
-ErrorHandler.ExtendedError = ExtendedError
 
-/**********************************************************
- *
- * Sample extended error usage
- *
- **********************************************************/
-class ValidationError extends ExtendedError {
-  constructor (message) {
-    super('Validation Error', message)
-    this.code = 'ERRVAL'
-    this.statusCode = this.status = 403
+  toString () {
+    return JSON.stringify(this.toJSON())
   }
 }
+
+/**********************************************************/
+
+class ClientError extends ExtendedError {
+  constructor (message, options) {
+    options||(options={})
+    super(message || 'Invalid Request', options)
+    this.name = this.constructor.name
+    this.code = options.code || ''
+    this.status = options.statusCode || 400
+    this.statusCode = this.status
+  }
+}
+
+class ServerError extends ExtendedError {
+  constructor (message, options) {
+    options||(options={})
+    super(message || 'Internal Server Error', options)
+    this.name = this.constructor.name
+    this.code = options.code || ''
+    this.status = options.statusCode || 500
+    this.statusCode = this.status
+  }
+}
+
+class ValidationError extends ExtendedError {
+  constructor (message, options) {
+    options||(options={})
+    super(message || 'Validation Error', options)
+    this.name = this.constructor.name
+    this.code = options.code || ''
+    this.status = options.statusCode || 400
+    this.statusCode = this.status
+  }
+}
+
+ErrorHandler.ExtendedError = ExtendedError
+
+ErrorHandler.ClientError = ClientError
+
+ErrorHandler.ServerError = ServerError
+
 ErrorHandler.ValidationError = ValidationError
 
+/**********************************************************/
