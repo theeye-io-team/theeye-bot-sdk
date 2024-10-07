@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.8.0](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.7.0...2.8.0) (2024-10-07)
+
+
+### Features
+
+* oauth authentication ([#5](https://github.com/theeye-io-team/theeye-bot-sdk/issues/5)) ([61d245c](https://github.com/theeye-io-team/theeye-bot-sdk/commit/61d245cdfa396ccab409b26305d69c42064f5fa6))
+
 ## [2.7.0](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.6.2...2.7.0) (2024-07-01)
 
 
