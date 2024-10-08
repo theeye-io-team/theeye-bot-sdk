@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.8.1](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.8.0...2.8.1) (2024-10-08)
+
+
+### Bug Fixes
+
+* **file:** set content from fetch ([9b3099d](https://github.com/theeye-io-team/theeye-bot-sdk/commit/9b3099dba5183cd0a0e1aa17f246b5bfcffc807f))
+
 ## [2.8.0](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.7.0...2.8.0) (2024-10-07)
 
 
