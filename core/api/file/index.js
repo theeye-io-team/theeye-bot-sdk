@@ -23,7 +23,9 @@ class TheEyeFile {
       extension: '',
     }, props)
 
-    this.content = props.content
+    if (props.content) {
+      this.content = props.content
+    }
   }
 
   set content (content) {
