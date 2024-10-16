@@ -3,11 +3,11 @@ const { google } = require('googleapis');
 const readline = require('readline');
 
 // Cargar las credenciales desde el archivo
-const { installed } = require('./credentials');
+const { installed } = require(process.env.GOOGLE_APP_CREDENTIALS); // Estas credenciales se obtienen en google cloud console
 
 const clientId = installed.client_id;
 const clientSecret = installed.client_secret;
-const redirectUri = installed.redirect_uris[0]; // Normalmente 'urn:ietf:wg:oauth:2.0:oob'
+const redirectUri = 'urn:ietf:wg:oauth:2.0:oob'
 
 const oauth2Client = new google.auth.OAuth2(clientId, clientSecret, redirectUri);
 
