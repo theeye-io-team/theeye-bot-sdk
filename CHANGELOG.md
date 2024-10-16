@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.8.2](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.8.1...2.8.2) (2024-10-16)
+
+
+### Bug Fixes
+
+* **boilerplate:** hardcoded engine enn variables ([b68c3e5](https://github.com/theeye-io-team/theeye-bot-sdk/commit/b68c3e55e1a2f8f13cfa44ad598046c63ef9891d))
+
 ### [2.8.1](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.8.0...2.8.1) (2024-10-08)
 
 
