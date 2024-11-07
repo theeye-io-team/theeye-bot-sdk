@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.8.3](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.8.2...2.8.3) (2024-11-07)
+
+
+### Bug Fixes
+
+* transform google oauth to not using OOB ([2b112ef](https://github.com/theeye-io-team/theeye-bot-sdk/commit/2b112ef4fb994884c82b619542eec317611540ae))
+
 ### [2.8.2](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.8.1...2.8.2) (2024-10-16)
 
 

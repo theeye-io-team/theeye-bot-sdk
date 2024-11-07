@@ -1,6 +1,6 @@
 {
   "name": "theeye-bot-sdk",
-  "version": "2.8.2",
+  "version": "2.8.3",
   "description": "NodeJS SDK",
   "main": "index.js",
   "scripts": {
