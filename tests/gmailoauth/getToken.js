@@ -1,12 +1,12 @@
 const { google } = require('googleapis');
 
 // Cargar las credenciales desde un archivo llamado 'credentials.json' u otro archivo
-const { installed } = require('./credentials'); // Asegúrate de que el archivo tenga la estructura correcta
+const { installed } = require(process.env.GOOGLE_APP_CREDENTIALS); // Estas credenciales se obtienen en google cloud console
+const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
 
 // Configura tus credenciales OAuth2
 const clientId = installed.client_id;
 const clientSecret = installed.client_secret;
-const refreshToken = installed.refresh_token;
 const redirectUri = 'urn:ietf:wg:oauth:2.0:oob'; // Esto es para aplicaciones locales
 
 // Crear un cliente OAuth2

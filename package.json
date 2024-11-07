@@ -36,6 +36,7 @@
     "standard-version": "~9.5.0"
   },
   "devDependencies": {
+    "open": "~10.1.0",
     "webpack": "~5.89.0"
   }
 }

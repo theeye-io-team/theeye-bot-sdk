@@ -1,16 +1,17 @@
 const { google } = require('googleapis')
 
 const userEmail = process.env.EMAIL
+const searchFrom = process.env.SEARCH_FROM
+const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
 
 const MailBot = require('../../core/mail/client')
 
 // Cargar las credenciales desde un archivo llamado 'credentials.json' u otro archivo
-const { installed } = require('./credentials'); // Asegúrate de que el archivo tenga la estructura correcta
+const { installed } = require(process.env.GOOGLE_APP_CREDENTIALS); // Asegúrate de que el archivo tenga la estructura correcta
 
 // Configura tus credenciales OAuth2
 const clientId = installed.client_id;
 const clientSecret = installed.client_secret;
-const refreshToken = installed.refresh_token;
 const redirectUri = 'urn:ietf:wg:oauth:2.0:oob'; // Esto es para aplicaciones locales
 
 // Crear un cliente OAuth2

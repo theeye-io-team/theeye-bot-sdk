@@ -1,18 +1,18 @@
-
 const { google } = require('googleapis');
-const readline = require('readline');
+const http = require('http');
+const url = require('url');
 
 // Cargar las credenciales desde el archivo
-const { installed } = require(process.env.GOOGLE_APP_CREDENTIALS); // Estas credenciales se obtienen en google cloud console
+const { installed } = require(process.env.GOOGLE_APP_CREDENTIALS);
 
 const clientId = installed.client_id;
 const clientSecret = installed.client_secret;
-const redirectUri = 'urn:ietf:wg:oauth:2.0:oob'
+const redirectUri = 'http://localhost:4000/oauth2callback';
 
 const oauth2Client = new google.auth.OAuth2(clientId, clientSecret, redirectUri);
 
 // Generar la URL de autorización
-const scopes = ['https://mail.google.com/']; // Cambia los scopes según lo que necesites
+const scopes = ['https://mail.google.com/', 'https://www.googleapis.com/auth/drive']; // Cambia los scopes según lo que necesites
 const authUrl = oauth2Client.generateAuthUrl({
   access_type: 'offline', // Esto es necesario para obtener el refresh_token
   scope: scopes,
@@ -21,20 +21,49 @@ const authUrl = oauth2Client.generateAuthUrl({
 console.log('Por favor, visita este enlace para autorizar la aplicación:');
 console.log(authUrl);
 
-// Abrir el navegador automáticamente (opcional)
-// Usar readline para leer el código de autorización
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
+// Create local server to handle the OAuth callback
+async function getAuthorizationCode() {
+  return new Promise(async (resolve, reject) => {
+    // Dynamically import the 'open' package
+    const open = (await import('open')).default;
+    
+    const server = http.createServer(async (req, res) => {
+      try {
+        const parsedUrl = url.parse(req.url, true);
+        if (parsedUrl.pathname === '/oauth2callback') {
+          const code = parsedUrl.query.code;
+          res.writeHead(200, { 'Content-Type': 'text/html' });
+          res.end('Authentication successful! You can close this window.');
+          server.close();
+          resolve(code);
+        }
+      } catch (error) {
+        reject(error);
+      }
+    });
 
-rl.question('Introduce el código de autorización: ', async (code) => {
-  rl.close();
-  // Intercambiar el código de autorización por tokens
-  const { tokens } = await oauth2Client.getToken(code);
-  oauth2Client.setCredentials(tokens);
+    server.listen(4000, () => {
+      // Open the authorization URL in the default browser
+      open(authUrl);
+    });
+  });
+}
 
-  console.log('Access Token:', tokens.access_token);
-  console.log('Refresh Token:', tokens.refresh_token); // Aquí obtienes el refresh token
-});
+// Replace the readline section with this
+async function main() {
+  try {
+    const code = await getAuthorizationCode();
+    const { tokens } = await oauth2Client.getToken(code);
+    oauth2Client.setCredentials(tokens);
+
+    console.log('Access Token:', tokens.access_token);
+    console.log('Refresh Token:', tokens.refresh_token);
+    process.exit(0);
+  } catch (error) {
+    console.error('Error:', error);
+    process.exit(1);
+  }
+}
+
+main();
 

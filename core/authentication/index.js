@@ -28,6 +28,9 @@ module.exports = async (auth) => {
       .catch(err => err)
 
     if (token instanceof Error) {
+      if (token.response) {
+        console.error(token.response)
+      }
       throw new Error('googlexoauth oauth failed')
     }
 
