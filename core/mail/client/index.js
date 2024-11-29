@@ -18,7 +18,13 @@ const TIMEZONE = 'America/Argentina/Buenos_Aires'
 
 const Authentication = require('../../authentication')
 
+/**
+ * @class MailBot
+ */
 class MailBot {
+  /** @private mail client configuration */
+  config
+
   constructor (config) {
     this.config = config
   }
@@ -83,7 +89,7 @@ class MailBot {
     // by deafult use the body as filter, unless it is say the opposite.
     // some IMAP Server missunderstand the string used in body filtering
     // thus the search result will be empty
-    if (process.env.USE_IMAP_BODY_FILTER === "false") {
+    if (process.env.USE_MAIL_BODY_FILTER === "false") {
       console.warn('WARN: body filter is disabled by env')
       delete query.body
     }
@@ -95,7 +101,7 @@ class MailBot {
     }
     console.log(`${searchResult.length} messages with the selected criteria`)
 
-    return searchResult.map(seq => new Message(seq, this))
+    return searchResult.map(seq => new ImapMessage(seq, this))
   }
 
   disconnect () {
@@ -118,88 +124,35 @@ const noopLogger = {
 }
 
 class Message {
-  // private
-  #mailbot
+  /** @private mail client instance */
+  client
+
+  /** @type {Object} Parsed email data from mailparser */
   data
+
+  /** @type {Object} Email metadata from mail server */
   meta
+
+  /** @type {string} Message ID */
   id
+
+  /** @type {number} Unique identifier for message */
   uid
+
+  /** @type {number} Message sequence number */
   seq
 
-  constructor (seq, mailbot) {
-    this.#mailbot = mailbot
-    this.seq = seq
-  }
-
   /**
-   * @return Promise
+   * @param {string} id message ID
+   * @param {Object} client mail client instance
    */
-  move (folder) {
-    if (this.#mailbot.config.moveProcessedMessages !== true) {
-      console.log(`message won\'t be moved. moveProcessedMessages is disabled by config`)
-      return
-    }
-
-    folder || (folder = this.#mailbot.config.folders?.processed)
-
-    if (!folder) {
-      throw new Error(`Target folder to move messages needed`)
-    }
-    
-    console.log(`moving message to ${folder}`)
-    return (
-      this.#mailbot.connection.messageMove(this.seq, folder).then(() => {
-        console.log(`message moved to ${folder}`)
-      })
-    )
-  }
-
-  /**
-   * @param {Mail} message
-   * @param {Array} types list to search by admited extensions
-   * @return {Array}
-   */
-  async getContent () {
-    const { meta, content } = await this.download()
-
-    if (!content) {
-      throw new Error('cannot get mail content')
-    }
-
-    const rawData = await streamToString(content)
-
-    this.rawData = rawData
-    this.meta = meta
-    this.data = await simpleParser(rawData)
-
-    return this.data
-  }
-
-  async getId () {
-    const uid = await this.#mailbot.connection.fetchOne(this.seq, { uid: true })
-    Object.assign(this, uid)
-    return uid
-  }
-
-  /**
-   * @return {Promise}
-   */
-  download () {
-    return this.#mailbot.connection.download(this.seq)
+  constructor(id, client) {
+    this.seq = this.id = id
+    this.client = client
   }
 
   get date () {
     return this.data.date
-  }
-
-  /**
-   * It takes the closest registered received date
-   */
-  get dateReceived () {
-    const last = this.data.headers.get("received")[0]
-    const parts = last.split(';')
-    const date = new Date(parts[ parts.length - 1 ])
-    return date
   }
 
   get from () {
@@ -222,7 +175,7 @@ class Message {
     return this.data.html || ''
   }
 
-  async searchBody (rule) {
+  searchBody (rule) {
     if (rule.format === 'text') {
       return this.text
     }
@@ -236,7 +189,7 @@ class Message {
     }
   }
 
-  async searchHeaders (rule) {
+  searchHeaders (rule) {
     if (Array.isArray(rule.select) && rule.select.length > 0) {
       const selected = []
       for (let xx = 0; xx < rule.select.length; xx++) {
@@ -251,37 +204,6 @@ class Message {
     } else {
       return this.data.headerLines
     }
-  }
-
-  async searchAttachments (rule) {
-    const allowed = rule || this.#mailbot.config.attachments?.allowed
-    const attachments = []
-
-    if (this.data.attachments.length) {
-      for (const attachment of this.data.attachments) {
-        if (allowed.dispositions.indexOf(attachment.contentDisposition) !== -1) {
-          //const extension = path.extname(attachment.filename).replace(/[^\w\-. ]/g, '').toLowerCase()
-          const extension = path.extname(attachment.filename).replace('.','').toLowerCase()
-
-          if (extension && allowed.extensions.indexOf(extension) !== -1) {
-            if (attachment.contentType === 'application/ms-tnef') {
-              const files = await parseAsTnef(attachment.content)
-
-              if (files.Attachments.length > 1) {
-                throw new Error('Unhandled multiple TNEF attachments')
-              }
-
-              attachment.content = Buffer.from(files.Attachments[0].Data)
-              attachment.filename = files.Attachments[0].Title
-              attachment.contentType = mime.lookup(attachment.filename)
-            }
-            attachments.push(attachment)
-          }
-        }
-      }
-    }
-
-    return attachments
   }
 
   async searchBodyAttachments (rule) {
@@ -350,7 +272,7 @@ class Message {
     let bodyMatched
     let bodyText
     if (process.env.USE_IMAP_BODY_FILTER === "false") {
-      bodyText = message.body.split(/[\n\s]/).join(' ')
+      bodyText = this.body.split(/[\n\s]/).join(' ')
       // filter by hand
       const pattern = new EscapedRegExp(filterExpr.trim())
       bodyMatched = pattern.test(bodyText)
@@ -362,6 +284,117 @@ class Message {
 
     return bodyMatched
   }
+}
+
+/**
+ * @class ImapMessage
+ */
+class ImapMessage extends Message {
+
+  /**
+   * @param {number} seq message sequence number
+   * @param {Object} client IMAP client instance
+   */
+  constructor (seq, client) {
+    super(seq, client)
+  }
+
+  /**
+   * @return Promise
+   */
+  move (folder) {
+    if (this.client.config.moveProcessedMessages !== true) {
+      console.log(`message won\'t be moved. moveProcessedMessages is disabled by config`)
+      return
+    }
+
+    folder || (folder = this.client.config.folders?.processed)
+
+    if (!folder) {
+      throw new Error(`Target folder to move messages needed`)
+    }
+    
+    console.log(`moving message to ${folder}`)
+    return (
+      this.client.connection.messageMove(this.seq, folder).then(() => {
+        console.log(`message moved to ${folder}`)
+      })
+    )
+  }
+
+  /**
+   * @return {Array}
+   */
+  async getContent () {
+    const { meta, content } = await this.download()
+
+    if (!content) {
+      throw new Error('cannot get mail content')
+    }
+
+    const rawData = await streamToString(content)
+
+    this.rawData = rawData
+    this.meta = meta
+    this.data = await simpleParser(rawData)
+
+    return this.data
+  }
+
+  async getId () {
+    const uid = await this.client.connection.fetchOne(this.seq, { uid: true })
+    Object.assign(this, uid)
+    return uid
+  }
+
+  /**
+   * @return {Promise}
+   */
+  download () {
+    return this.client.connection.download(this.seq)
+  }
+
+  /**
+   * It takes the closest registered received date
+   */
+  get dateReceived () {
+    const last = this.data.headers.get("received")[0]
+    const parts = last.split(';')
+    const date = new Date(parts[ parts.length - 1 ])
+    return date
+  }
+
+  async searchAttachments (rule) {
+    const allowed = rule || this.client.config.attachments?.allowed
+    const attachments = []
+
+    if (this.data.attachments.length) {
+      for (const attachment of this.data.attachments) {
+        if (allowed.dispositions.indexOf(attachment.contentDisposition) !== -1) {
+          //const extension = path.extname(attachment.filename).replace(/[^\w\-. ]/g, '').toLowerCase()
+          const extension = path.extname(attachment.filename).replace('.','').toLowerCase()
+
+          if (extension && allowed.extensions.indexOf(extension) !== -1) {
+            if (attachment.contentType === 'application/ms-tnef') {
+              const files = await parseAsTnef(attachment.content)
+
+              if (files.Attachments.length > 1) {
+                throw new Error('Unhandled multiple TNEF attachments')
+              }
+
+              attachment.content = Buffer.from(files.Attachments[0].Data)
+              attachment.filename = files.Attachments[0].Title
+              attachment.contentType = mime.lookup(attachment.filename)
+            }
+            attachments.push(attachment)
+          }
+        }
+      }
+    }
+
+    return attachments
+  }
+
 }
 
 /**
@@ -461,5 +494,9 @@ const downloadFile = async (url) => {
     headers: fileData.headers,
   }
 }
+
+MailBot.Message = Message
+
+MailBot.ImapMessage = ImapMessage
 
 module.exports = MailBot
