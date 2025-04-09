@@ -13,7 +13,6 @@ const logger = require('../../logger')('mailbot')
 const EscapedRegExp = require('../../escaped-regexp')
 
 const IGNORE_MESSAGES_TIMEZONE = false
-const USE_SERVER_RECEIVED_DATE = false
 const TIMEZONE = 'America/Argentina/Buenos_Aires'
 
 const Authentication = require('../../authentication')
@@ -238,17 +237,27 @@ class Message {
   getParsedDate (options = {}) {
     const useReceivedDate = (
       process.env.USE_SERVER_RECEIVED_DATE === 'true' ||
-      options?.useReceivedDate ||
-      USE_SERVER_RECEIVED_DATE
+      options?.useReceivedDate
+    )
+
+    const useSentDate = (
+      process.env.USE_SERVER_SEND_DATE === 'true' ||
+      options?.useSentDate
     )
 
     let messageDate
-    if (useReceivedDate === true) {
+    if (useSentDate === true) {
+      console.log('Using message "sent" date')
+      messageDate = this.date
+      console.log('message "sent" date is: ' + messageDate)
+    } else if (useReceivedDate === true) {
       console.log('useReceivedDate: Using server "Received" date')
       messageDate = this.dateReceived
+      console.log('message "received" date is: ' + messageDate)
     } else {
-      console.log('Using message "Sent" date')
+      console.log('Using message "received" date')
       messageDate = this.date
+      console.log('message "received" date is: ' + messageDate)
     }
 
     const ignoreMessageTimezone = (
@@ -283,6 +292,16 @@ class Message {
     }
 
     return bodyMatched
+  }
+
+  /**
+   * It takes the closest registered received date
+   */
+  get dateReceived () {
+    const last = this.data.headers.get("received")[0]
+    const parts = last.split(';')
+    const date = new Date(parts[ parts.length - 1 ])
+    return date
   }
 }
 
@@ -354,16 +373,6 @@ class ImapMessage extends Message {
     return this.client.connection.download(this.seq)
   }
 
-  /**
-   * It takes the closest registered received date
-   */
-  get dateReceived () {
-    const last = this.data.headers.get("received")[0]
-    const parts = last.split(';')
-    const date = new Date(parts[ parts.length - 1 ])
-    return date
-  }
-
   async searchAttachments (rule) {
     const allowed = rule || this.client.config.attachments?.allowed
     const attachments = []
@@ -371,7 +380,12 @@ class ImapMessage extends Message {
     if (this.data.attachments.length) {
       for (const attachment of this.data.attachments) {
         if (allowed.dispositions.indexOf(attachment.contentDisposition) !== -1) {
-          //const extension = path.extname(attachment.filename).replace(/[^\w\-. ]/g, '').toLowerCase()
+
+          if (!attachment?.filename) {
+            console.log('WARN: attachment has no filename')
+            continue
+          }
+
           const extension = path.extname(attachment.filename).replace('.','').toLowerCase()
 
           if (extension && allowed.extensions.indexOf(extension) !== -1) {
