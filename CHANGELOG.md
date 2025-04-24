@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.9.0](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.8.5...2.9.0) (2025-04-24)
+
+
+### Features
+
+* **mail:** msgraph support ([d33c15d](https://github.com/theeye-io-team/theeye-bot-sdk/commit/d33c15d7859f4d8e63cbc26fc4502091559e2a39))
+
 ### [2.8.5](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.8.4...2.8.5) (2025-04-09)
 
 
