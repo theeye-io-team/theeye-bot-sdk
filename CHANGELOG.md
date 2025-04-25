@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.9.1](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.9.0...2.9.1) (2025-04-25)
+
+
+### Bug Fixes
+
+* initialize querystring as string ([fa77b19](https://github.com/theeye-io-team/theeye-bot-sdk/commit/fa77b1989ab7a8487de8c2382c68803e440cf865))
+
 ## [2.9.0](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.8.5...2.9.0) (2025-04-24)
 
 
