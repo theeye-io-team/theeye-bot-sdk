@@ -205,7 +205,7 @@ class MsGraphMailbot {
       // Build URL with qs
       const userId = this.config.msGraph.auth.user
 
-      let queryParams = undefined
+      let queryParams = ''
       if (filters.length > 0) {
         const $filter = (filters.length === 1) ? filters[0] : filters.join(' and ')
         const filtersqs =  qs.stringify({ $filter }, { encode: encodeSearchParams })
