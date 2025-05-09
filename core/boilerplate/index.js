@@ -1,37 +1,63 @@
-
 const path = require('path')
+require('dotenv').config({ path: process.env.DOTENV_PATH })
 
-// set environment variables
 process.env.THEEYE_JOB = process.env.THEEYE_JOB || JSON.stringify({ id: '', task_id: '' })
 process.env.THEEYE_JOB_USER = process.env.THEEYE_JOB_USER || JSON.stringify({ id: '', email: '', username: '' })
 process.env.THEEYE_JOB_WORKFLOW = process.env.THEEYE_JOB_WORKFLOW || JSON.stringify({ job_id: '', id: '' })
 process.env.THEEYE_ORGANIZATION_NAME = process.env.THEEYE_ORGANIZATION_NAME || JSON.stringify('')
 process.env.THEEYE_API_URL = process.env.THEEYE_API_URL || JSON.stringify('https://supervisor.theeye.io')
 
-const dotenv = (process.env.DOTENV_PATH)
-require('dotenv').config({ path: dotenv })
-
 console.log('theeye-bot-sdk')
 console.log(`node version: ${process.version}`)
 
-// error and output handlers must go first.
+// ---------------- graceful shutdown handler ----------------
 
-/**
- * @param {Object}
- * @prop {Mixed} data
- * @prop {Array} components
- * @prop {Object} next
- */
+function gracefullyShutdown({ onCleanup } = {}) {
+  let isShuttingDown = false
+
+  const shutdown = async (reason, err = null) => {
+    if (isShuttingDown) return
+    isShuttingDown = true
+
+    try {
+      if (onCleanup && typeof onCleanup === 'function') {
+        await onCleanup()
+      }
+    } catch (cleanupErr) {
+      failureOutput(cleanupErr)
+      return
+    }
+
+    if (err) {
+      failureOutput(err)
+    } else {
+      const shutdownError = new Error(`Process terminated: ${reason}`)
+      shutdownError.code = 'SHUTDOWN'
+      failureOutput(shutdownError)
+    }
+  }
+
+  process.on('SIGINT', () => shutdown('SIGINT', new Error('SIGINT received')))
+  process.on('SIGTERM', () => shutdown('SIGTERM', new Error('SIGTERM received')))
+  process.on('uncaughtException', err => shutdown('uncaughtException', err))
+  process.on('unhandledRejection', reason => {
+    const err = reason instanceof Error ? reason : new Error(String(reason))
+    shutdown('unhandledRejection', err)
+  })
+
+  return shutdown
+}
+
+// ---------------- output handlers ----------------
+
+const shutdown = gracefullyShutdown()
+
 const successOutput = (options = {}) => {
-  // https://documentation.theeye.io/core-concepts/scripts/#passing-arguments-in-workflow
   const output = Object.assign({ state: 'success' }, options)
-  console.log( JSON.stringify(output) )
+  console.log(JSON.stringify(output))
   process.exit(0)
 }
 
-/**
- * @param {Error} err
- */
 const failureOutput = (err) => {
   console.error(err)
   const output = {
@@ -42,57 +68,58 @@ const failureOutput = (err) => {
       data: err.data
     }
   }
-  console.error( JSON.stringify(output) )
+  console.error(JSON.stringify(output))
   process.exit(1)
 }
 
-process.on('unhandledRejection', (reason, p) => {
-  console.error(reason, 'Unhandled Rejection at Promise', p)
-  failureOutput(reason)
-})
+// ---------------- boilerplate execution logic ----------------
 
-process.on('uncaughtException', err => {
-  console.error(err, 'Uncaught Exception thrown')
-  failureOutput(err)
-})
-
-process.once('SIGINT', function (code) {
-  console.log('SIGINT received');
-  const err = new Error('SIGINT received')
-  err.code = code
-  failureOutput(err)
-})
-
-process.once('SIGTERM', function (code) {
-  console.log('SIGTERM received...');
-  const err = new Error('SIGTERM received')
-  err.code = code
-  failureOutput(err)
-})
-
-const createHandler = exports.createHandler = (main, caller = undefined) => {
+const createHandler = exports.createHandler = (main, options = {}) => {
   console.log(`Boilerplate handler created for ${process.argv[1]}`)
-  // create a function ready to be executed
+  
   const handler = async (args = undefined) => {
     try {
-      // arguments are optional.
-      // if arguments are not provided process.argv will be used as arguments
-      args || (args = process.argv.slice(2))
+      args ||= process.argv.slice(2)
       const result = await main(args)
+      
+      // Run cleanup before success output
+      if (options.onCleanup) {
+        try {
+          await options.onCleanup()
+        } catch (cleanupErr) {
+          failureOutput(cleanupErr)
+          return
+        }
+      }
+      
       successOutput(result)
     } catch (err) {
+      // Run cleanup before failure output
+      if (options.onCleanup) {
+        try {
+          await options.onCleanup()
+        } catch (cleanupErr) {
+          failureOutput(cleanupErr)
+          return
+        }
+      }
+      
       failureOutput(err)
     }
   }
 
-  // if the handled function script was executed directly, run the handler
-  if (caller && require.main === caller) {
+  // Set up shutdown handlers
+  const shutdown = gracefullyShutdown({
+    onCleanup: options.onCleanup
+  })
+
+  if (options.caller && require.main === options.caller) {
     return handler()
   } else {
     return handler
   }
 }
 
-const executeHandler = exports.executeHandler = async (main, args) => {
+exports.executeHandler = async (main, args) => {
   return createHandler(main)(args)
 }

@@ -4,7 +4,7 @@
   "description": "NodeJS SDK",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha 'core/**/*.test.js'",
     "release": "npx standard-version -t ''"
   },
   "repository": {
@@ -36,6 +36,7 @@
     "standard-version": "~9.5.0"
   },
   "devDependencies": {
+    "mocha": "^11.2.2",
     "open": "~10.1.0",
     "webpack": "~5.89.0"
   }
