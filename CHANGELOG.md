@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.10.0](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.9.1...2.10.0) (2025-05-09)
+
+
+### Features
+
+* **boilerplate:** add graceful shutdown handler ([34bf787](https://github.com/theeye-io-team/theeye-bot-sdk/commit/34bf78768b3969e821bd29658422c3874df6fdb4))
+
 ### [2.9.1](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.9.0...2.9.1) (2025-04-25)
 
 
