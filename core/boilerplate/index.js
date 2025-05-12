@@ -74,7 +74,7 @@ const failureOutput = (err) => {
 
 // ---------------- boilerplate execution logic ----------------
 
-const createHandler = exports.createHandler = (main, options = {}) => {
+const createHandler = exports.createHandler = (main, caller, options = {}) => {
   console.log(`Boilerplate handler created for ${process.argv[1]}`)
   
   const handler = async (args = undefined) => {
@@ -113,7 +113,7 @@ const createHandler = exports.createHandler = (main, options = {}) => {
     onCleanup: options.onCleanup
   })
 
-  if (options.caller && require.main === options.caller) {
+  if (caller && require.main === caller) {
     return handler()
   } else {
     return handler
