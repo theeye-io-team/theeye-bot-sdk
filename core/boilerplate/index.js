@@ -47,10 +47,7 @@ function gracefullyShutdown({ onCleanup } = {}) {
 
   return shutdown
 }
-
 // ---------------- output handlers ----------------
-
-const shutdown = gracefullyShutdown()
 
 const successOutput = (options = {}) => {
   const output = Object.assign({ state: 'success' }, options)
@@ -59,6 +56,15 @@ const successOutput = (options = {}) => {
 }
 
 const failureOutput = (err) => {
+
+  // Forzar desconexión del debugger, si está activo
+  if (process._debugProcess) {
+    console.log('Debugger active, forcing disconnection');
+    process._debugEnd();  // Desconectar el debugger de forma forzada
+    //process.disconnect()
+    process._debugProcess = null;
+  }
+
   console.error(err)
   const output = {
     state: "failure",
@@ -109,7 +115,7 @@ const createHandler = exports.createHandler = (main, caller, options = {}) => {
   }
 
   // Set up shutdown handlers
-  const shutdown = gracefullyShutdown({
+  gracefullyShutdown({
     onCleanup: options.onCleanup
   })
 
