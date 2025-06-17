@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.11.0](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.10.3...2.11.0) (2025-06-17)
+
+
+### Features
+
+* mailbox lock ([33915b8](https://github.com/theeye-io-team/theeye-bot-sdk/commit/33915b849594a3454c8b00b5716928ecb9854f31))
+
 ### [2.10.3](https://github.com/theeye-io-team/theeye-bot-sdk/compare/2.10.2...2.10.3) (2025-05-26)
 
 
