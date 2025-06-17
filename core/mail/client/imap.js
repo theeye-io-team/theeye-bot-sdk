@@ -53,7 +53,11 @@ class MailBot {
 
     const client = new ImapFlow(config)
     await client.connect()
-    this.mailboxLock = await client.getMailboxLock(folder || this.config.folders?.INBOX)
+    
+    // NUEVO: Solo hacer lock de carpeta si se especifica (backward compatibility)
+    if (folder !== null) {
+      this.mailboxLock = await client.getMailboxLock(folder || this.config.folders?.INBOX)
+    }
 
     this.connection = client
 
@@ -67,7 +71,42 @@ class MailBot {
     return this
   }
 
+  /**
+   * Selecciona y bloquea una carpeta específica
+   * @param {string} folder - Nombre de la carpeta a seleccionar
+   * @returns {Promise<Object>} - Lock object de la carpeta
+   */
+  async selectFolder(folder) {
+    if (!this.connection) {
+      throw new Error('Must connect first before selecting a folder')
+    }
+
+    // Liberar lock anterior si existe
+    if (this.mailboxLock) {
+      this.mailboxLock.release()
+    }
+
+    // Obtener nuevo lock para la carpeta
+    this.mailboxLock = await this.connection.getMailboxLock(folder)
+    return this.mailboxLock
+  }
+
+  /**
+   * Libera el lock de la carpeta actual sin desconectar
+   */
+  releaseFolder() {
+    if (this.mailboxLock) {
+      this.mailboxLock.release()
+      this.mailboxLock = null
+    }
+  }
+
   async searchMessages (searchCriteria = null) {
+    // Verificar que haya una carpeta seleccionada
+    if (!this.mailboxLock) {
+      throw new Error('No folder selected. Use selectFolder() or connect() with folder parameter first.')
+    }
+
     // search using input or the fixed search from config file
     searchCriteria || (searchCriteria = this.config.searchCriteria)
 

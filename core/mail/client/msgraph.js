@@ -35,14 +35,21 @@ class MsGraphMailbot {
 
   /**
    * Connect to the Microsoft Graph API
+   * @param {string|null} folder - Optional folder name for backward compatibility
    * @returns {Promise<void>}
    */
-  async connect() {
+  async connect(folder = null) {
     try {
       const cachedToken = this.loadCachedToken()
       if (cachedToken) {
         this.token = cachedToken
         this.connectionTime = new Date()
+        
+        // NUEVO: Configurar carpeta inicial si se especifica (backward compatibility)
+        if (folder !== null) {
+          this.selectFolder(folder)
+        }
+        
         return
       }
 
@@ -69,10 +76,70 @@ class MsGraphMailbot {
 
       this.token = response.data.access_token
       this.connectionTime = new Date()
+      
+      // NUEVO: Configurar carpeta inicial si se especifica (backward compatibility)
+      if (folder !== null) {
+        this.selectFolder(folder)
+      }
+      
     } catch (error) {
       console.error('Error authenticating:', error.response?.data || error.message)
       throw new Error('Failed to authenticate with Microsoft Graph')
     }
+  }
+
+  /**
+   * Selecciona una carpeta específica para las operaciones de búsqueda
+   * @param {string} folder - Nombre de la carpeta (ej: 'inbox', 'sent', nombre personalizado)
+   * @returns {string} - El searchUrl actualizado para la carpeta
+   */
+  selectFolder(folder) {
+    if (!folder) {
+      throw new Error('Folder name is required')
+    }
+
+    // Normalizar nombre de carpeta para Graph API
+    const normalizedFolder = this._normalizefolderName(folder)
+    
+    // Actualizar searchUrl dinámicamente
+    this.currentFolder = folder
+    this.currentSearchUrl = `/users/{userId}/mailFolders('${normalizedFolder}')/messages`
+    
+    return this.currentSearchUrl
+  }
+
+  /**
+   * Libera la carpeta actual (método por consistencia de API con IMAP)
+   * En Graph API no hay locks, pero mantiene consistencia
+   */
+  releaseFolder() {
+    this.currentFolder = null
+    this.currentSearchUrl = null
+  }
+
+  /**
+   * Normaliza el nombre de carpeta para la API de Graph
+   * @param {string} folder - Nombre de carpeta original
+   * @returns {string} - Nombre normalizado para Graph API
+   */
+  _normalizefolderName(folder) {
+    // Mapeo de nombres comunes
+    const folderMapping = {
+      'INBOX': 'inbox',
+      'Inbox': 'inbox', 
+      'inbox': 'inbox',
+      'SENT': 'sentitems',
+      'Sent': 'sentitems',
+      'sent': 'sentitems',
+      'TRASH': 'deleteditems',
+      'Trash': 'deleteditems',
+      'trash': 'deleteditems',
+      'DRAFTS': 'drafts',
+      'Drafts': 'drafts',
+      'drafts': 'drafts'
+    }
+
+    return folderMapping[folder] || folder
   }
 
   /**
@@ -146,7 +213,15 @@ class MsGraphMailbot {
   async searchMessages(searchCriteria) {
     try {
       const config = this.config.msGraph;
-      const { searchUrl, apiBaseUrl, encodeSearchParams = false } = config;
+      const { apiBaseUrl, encodeSearchParams = false } = config;
+      
+      // NUEVO: Usar carpeta dinámica o fallback a configuración
+      let searchUrl = this.currentSearchUrl || config.searchUrl
+      
+      // Validación: debe haber una carpeta seleccionada o configurada
+      if (!searchUrl) {
+        throw new Error('No folder selected. Use selectFolder() or connect() with folder parameter first.')
+      }
   
       const filters = [];
   
